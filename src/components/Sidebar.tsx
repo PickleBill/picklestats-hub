@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Film, Dna, Tag, Mic, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Film, Dna, Tag, Trophy, Mic, ChevronLeft, ChevronRight } from "lucide-react";
+import { useTMNT } from "@/context/TMNTContext";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/highlights", label: "Highlights", icon: Film },
   { to: "/player-dna", label: "Player DNA", icon: Dna },
   { to: "/brands", label: "Brands", icon: Tag },
+  { to: "/sports", label: "Sports", icon: Trophy },
   { to: "/voice-lab", label: "Voice Lab", icon: Mic },
 ];
 
 const Sidebar = () => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const { tmntMode, toggleTMNT } = useTMNT();
 
   return (
     <>
@@ -38,12 +41,26 @@ const Sidebar = () => {
         </div>
 
         {!collapsed && (
-          <div className="px-4 pb-4">
+          <div className="px-4 pb-2">
             <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-primary">
-              Pickle DaaS
+              {tmntMode ? "🐢 COWABUNGA SPORTS INTEL 🍕" : "Pickle DaaS"}
             </span>
           </div>
         )}
+
+        {/* TMNT Toggle */}
+        <div className="px-3 pb-3">
+          <button
+            onClick={toggleTMNT}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+              tmntMode
+                ? "bg-primary text-primary-foreground shadow-[0_0_15px_hsl(145_100%_45%/0.3)]"
+                : "bg-card border border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            🐢 {!collapsed && (tmntMode ? "TMNT MODE ON" : "TMNT MODE")}
+          </button>
+        </div>
 
         {/* Nav links */}
         <nav className="flex-1 px-3 space-y-1">
@@ -80,7 +97,7 @@ const Sidebar = () => {
           {!collapsed && (
             <p className="text-[10px] text-muted-foreground">
               Powered by <span className="text-foreground">Courtana</span>
-              <br />v3.0 · AI-Driven Sports Intelligence
+              <br />v4.0 · AI-Driven Sports Intelligence
             </p>
           )}
         </div>
@@ -95,11 +112,12 @@ const Sidebar = () => {
             <Link
               key={item.to}
               to={item.to}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors min-w-[44px] min-h-[44px] justify-center ${
+              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors min-w-[44px] min-h-[44px] justify-center relative ${
                 isActive ? "text-primary" : "text-muted-foreground"
               }`}
             >
               <Icon size={20} />
+              {isActive && <div className="w-1.5 h-1.5 rounded-full bg-primary absolute -bottom-0.5" />}
             </Link>
           );
         })}

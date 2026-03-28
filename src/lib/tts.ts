@@ -1,4 +1,5 @@
-import { supabase } from "@/integrations/supabase/client";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 let currentAudio: HTMLAudioElement | null = null;
 
@@ -16,17 +17,23 @@ export const playTTS = async (
   onStart?.();
 
   try {
-    const { data, error } = await supabase.functions.invoke('elevenlabs-tts', {
-      body: { text, persona, stability: 0.6, similarity_boost: 0.8 },
+    // Use fetch + blob instead of supabase SDK to preserve binary audio
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/elevenlabs-tts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+      },
+      body: JSON.stringify({ text, persona, stability: 0.6, similarity_boost: 0.8 }),
     });
 
-    if (error) throw error;
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`TTS failed: ${response.status} ${errText}`);
+    }
 
-    // data comes back as the raw response — convert to blob
-    const blob = data instanceof Blob
-      ? data
-      : new Blob([data], { type: 'audio/mpeg' });
-
+    const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
     currentAudio = audio;

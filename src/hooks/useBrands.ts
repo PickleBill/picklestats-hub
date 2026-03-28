@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+
+const BRANDS_URL =
+  "https://raw.githubusercontent.com/PickleBill/pickle-daas-data/main/output/lovable-package/brand-registry.json";
 
 export interface Brand {
   name: string;
@@ -9,32 +11,47 @@ export interface Brand {
   confidence: string;
   icon: string;
   logo_url?: string | null;
+  presence_percentage?: number;
+}
+
+const iconMap: Record<string, string> = {
+  JOOLA: "🏓",
+  "LIFE TIME PICKLEBALL": "🏟️",
+  CRBN: "🏸",
+};
+
+interface RawBrand {
+  brand_name: string;
+  category: string;
+  appearances: number;
+  clips: string[];
+  confidence: string;
+  presence_percentage: number;
 }
 
 const fallbackBrands: Brand[] = [
-  { name: "JOOLA", appearances: 3, category: "Paddle", clips: ["Clip 1", "Clip 2", "Clip 3"], confidence: "High", icon: "🏓" },
-  { name: "LIFE TIME PICKLEBALL", appearances: 3, category: "Venue / Apparel", clips: ["Clip 1", "Clip 2", "Clip 3"], confidence: "High", icon: "🏟️" },
+  { name: "JOOLA", appearances: 8, category: "Paddle/Net", clips: [], confidence: "High", icon: "🏓" },
+  { name: "LIFE TIME PICKLEBALL", appearances: 8, category: "Venue/Apparel", clips: [], confidence: "High", icon: "🏟️" },
+  { name: "CRBN", appearances: 2, category: "Paddle", clips: [], confidence: "Medium", icon: "🏸" },
 ];
 
 export const useBrands = () =>
   useQuery({
-    queryKey: ["brands"],
+    queryKey: ["brands-github"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pickle_daas_brands")
-        .select("*")
-        .order("appearance_count", { ascending: false });
-
-      if (error) throw error;
-      if (!data || data.length === 0) return fallbackBrands;
-      return data.map((b) => ({
+      const res = await fetch(BRANDS_URL);
+      if (!res.ok) throw new Error("Failed to fetch brands");
+      const raw: { brands: RawBrand[]; sponsorship_insight: string } = await res.json();
+      return raw.brands.map((b) => ({
         name: b.brand_name,
-        appearances: b.appearance_count,
+        appearances: b.appearances,
         category: b.category,
-        clips: b.detected_in_clips as string[],
+        clips: b.clips,
         confidence: b.confidence,
-        icon: b.icon,
-        logo_url: b.logo_url,
+        icon: iconMap[b.brand_name] || "📦",
+        presence_percentage: b.presence_percentage,
       })) as Brand[];
     },
+    staleTime: 5 * 60 * 1000,
+    placeholderData: fallbackBrands,
   });

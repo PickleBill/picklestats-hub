@@ -1,29 +1,42 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CommentaryTabs from "@/components/CommentaryTabs";
-import { useFeaturedClip, useClips } from "@/hooks/useClips";
-import { useBrands } from "@/hooks/useBrands";
-import { usePlayerDNA } from "@/hooks/usePlayerDNA";
+import { useFeaturedClip } from "@/hooks/useClips";
+import { useDashboard } from "@/hooks/useDashboard";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
 
+const radarKeyMap: Record<string, string> = {
+  court_coverage: "Court Coverage",
+  kitchen_mastery: "Kitchen Mastery",
+  power_game: "Power Game",
+  touch_feel: "Touch & Feel",
+  athleticism: "Athleticism",
+  creativity: "Creativity",
+  court_iq: "Court IQ",
+};
+
 const Dashboard = () => {
-  const { data: clips = [] } = useClips();
-  const { data: brands = [] } = useBrands();
-  const { data: player } = usePlayerDNA();
+  const { data: dash } = useDashboard();
   const featured = useFeaturedClip();
 
-  const avgQuality = clips.length ? (clips.reduce((s, c) => s + c.quality, 0) / clips.length).toFixed(1) : "7.3";
-  const avgViral = clips.length ? (clips.reduce((s, c) => s + c.viral, 0) / clips.length).toFixed(1) : "6.2";
-  const topBrand = brands[0]?.name || "JOOLA";
+  const kpis = dash
+    ? [
+        { label: "Clips Analyzed", value: String(dash.kpis.clips_analyzed), sub: "" },
+        { label: "Avg Quality", value: String(dash.kpis.avg_quality_score), sub: "/ 10" },
+        { label: "Top Brand", value: dash.kpis.top_brand, sub: "" },
+        { label: "Viral Potential", value: String(dash.kpis.avg_viral_score), sub: "avg" },
+      ]
+    : [];
 
-  const kpis = [
-    { label: "Clips Analyzed", value: String(clips.length || 6), sub: "" },
-    { label: "Avg Quality", value: avgQuality, sub: "/ 10" },
-    { label: "Top Brand", value: topBrand, sub: "" },
-    { label: "Viral Potential", value: avgViral, sub: "avg" },
-  ];
+  const radarData = dash
+    ? Object.entries(dash.analytics.skill_radar).map(([k, v]) => ({
+        stat: radarKeyMap[k] || k,
+        value: v,
+      }))
+    : [];
 
-  const radarData = player?.radar_stats || [];
-  const brandData = brands.map((b) => ({ name: b.name, count: b.appearances }));
+  const brandData = dash
+    ? dash.analytics.top_brands.map((b) => ({ name: b.brand, count: b.count }))
+    : [];
 
   return (
     <div className="container py-8 space-y-8">

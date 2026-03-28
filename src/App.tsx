@@ -8,6 +8,7 @@ import { TMNTProvider } from "@/context/TMNTContext";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import PizzaEasterEgg from "./components/PizzaEasterEgg";
+import KeyboardShortcuts from "./components/KeyboardShortcuts";
 import Index from "./pages/Index";
 import Highlights from "./pages/Highlights";
 import PlayerDNA from "./pages/PlayerDNA";
@@ -42,6 +43,7 @@ const App = () => (
               <Footer />
             </div>
             <PizzaEasterEgg />
+            <KeyboardShortcuts />
           </BrowserRouter>
         </TooltipProvider>
       </TMNTProvider>

@@ -14,7 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      pickle_daas_analyses: {
+        Row: {
+          arc_color: string
+          arc_type: string
+          badges: Json
+          brands_detected: Json
+          clip_url: string
+          commentary: Json
+          created_at: string
+          id: string
+          name: string
+          quality_score: number
+          viral_score: number
+        }
+        Insert: {
+          arc_color?: string
+          arc_type?: string
+          badges?: Json
+          brands_detected?: Json
+          clip_url: string
+          commentary?: Json
+          created_at?: string
+          id?: string
+          name: string
+          quality_score?: number
+          viral_score?: number
+        }
+        Update: {
+          arc_color?: string
+          arc_type?: string
+          badges?: Json
+          brands_detected?: Json
+          clip_url?: string
+          commentary?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          quality_score?: number
+          viral_score?: number
+        }
+        Relationships: []
+      }
+      pickle_daas_brands: {
+        Row: {
+          appearance_count: number
+          brand_name: string
+          category: string
+          confidence: string
+          created_at: string
+          detected_in_clips: Json
+          icon: string
+          id: string
+          logo_url: string | null
+        }
+        Insert: {
+          appearance_count?: number
+          brand_name: string
+          category?: string
+          confidence?: string
+          created_at?: string
+          detected_in_clips?: Json
+          icon?: string
+          id?: string
+          logo_url?: string | null
+        }
+        Update: {
+          appearance_count?: number
+          brand_name?: string
+          category?: string
+          confidence?: string
+          created_at?: string
+          detected_in_clips?: Json
+          icon?: string
+          id?: string
+          logo_url?: string | null
+        }
+        Relationships: []
+      }
+      pickle_daas_player_dna: {
+        Row: {
+          badge_count: number
+          coaching_notes: Json
+          created_at: string
+          dominant_shot: string
+          id: string
+          level: number
+          play_styles: Json
+          radar_stats: Json
+          rank_label: string
+          tier: string
+          username: string
+          xp: number
+        }
+        Insert: {
+          badge_count?: number
+          coaching_notes?: Json
+          created_at?: string
+          dominant_shot?: string
+          id?: string
+          level?: number
+          play_styles?: Json
+          radar_stats?: Json
+          rank_label?: string
+          tier?: string
+          username: string
+          xp?: number
+        }
+        Update: {
+          badge_count?: number
+          coaching_notes?: Json
+          created_at?: string
+          dominant_shot?: string
+          id?: string
+          level?: number
+          play_styles?: Json
+          radar_stats?: Json
+          rank_label?: string
+          tier?: string
+          username?: string
+          xp?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

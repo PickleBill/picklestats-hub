@@ -4,10 +4,15 @@ const corsHeaders = {
 };
 
 const VOICE_MAP: Record<string, string> = {
-  espn: 'TxGEqnHWrfWFTfGW9XjX',       // Josh — deep, broadcast
-  hype: 'ErXwobaYiN019PkySvjV',         // Antoni — energetic
-  ronBurgundy: 'pNInz6obpgDQGcFmaJgB',  // Adam — confident, pompous
-  chuckNorris: 'VR6AewLTigWG4xSOukaG',  // Arnold — legendary
+  espn: 'TxGEqnHWrfWFTfGW9XjX',
+  hype: 'ErXwobaYiN019PkySvjV',
+  ronBurgundy: 'pNInz6obpgDQGcFmaJgB',
+  chuckNorris: 'VR6AewLTigWG4xSOukaG',
+  leonardo: 'TxGEqnHWrfWFTfGW9XjX',
+  raphael: 'VR6AewLTigWG4xSOukaG',
+  donatello: 'pNInz6obpgDQGcFmaJgB',
+  michelangelo: 'ErXwobaYiN019PkySvjV',
+  splinter: 'EXAVITQu4vr4xnSDxMaL',
 };
 
 Deno.serve(async (req) => {
@@ -16,7 +21,11 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { text, persona } = await req.json();
+    const body = await req.json();
+    const text = body.text;
+    const voiceId = body.voice_id || VOICE_MAP[body.persona] || VOICE_MAP.espn;
+    const stability = body.stability ?? 0.5;
+    const similarityBoost = body.similarity_boost ?? 0.75;
 
     if (!text || typeof text !== 'string') {
       return new Response(JSON.stringify({ error: 'text is required' }), {
@@ -25,7 +34,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    const voiceId = VOICE_MAP[persona] || VOICE_MAP.espn;
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
 
     if (!ELEVENLABS_API_KEY) {
@@ -47,8 +55,8 @@ Deno.serve(async (req) => {
           text,
           model_id: 'eleven_turbo_v2_5',
           voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
+            stability,
+            similarity_boost: similarityBoost,
             style: 0.5,
             use_speaker_boost: true,
           },

@@ -1,56 +1,65 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { clips as fallbackClips, featuredClip as fallbackFeatured, type Clip } from "@/data/clips";
 
-interface DbAnalysis {
+const CLIPS_URL =
+  "https://raw.githubusercontent.com/PickleBill/pickle-daas-data/main/output/lovable-package/clips-metadata.json";
+
+const arcColorMap: Record<string, string> = {
+  athletic_highlight: "bg-amber-500",
+  grind_rally: "bg-primary",
+  teaching_moment: "bg-blue-500",
+  pure_fun: "bg-cyan-500",
+  error_highlight: "bg-destructive",
+};
+
+interface RawClip {
   id: string;
-  clip_url: string;
   name: string;
+  video_url: string;
   quality_score: number;
   viral_score: number;
-  arc_type: string;
-  arc_color: string;
-  brands_detected: string[];
-  badges: string[];
-  commentary: {
-    espn: string;
-    hype: string;
-    ronBurgundy: string;
-    chuckNorris: string;
-  };
+  story_arc: string;
+  ron_burgundy_quote: string;
+  top_badge: string | null;
+  brands: string[];
+  caption: string;
 }
 
-const mapToClip = (row: DbAnalysis): Clip => ({
-  id: row.id,
-  name: row.name,
-  video: row.clip_url,
-  quality: Number(row.quality_score),
-  viral: Number(row.viral_score),
-  arc: row.arc_type,
-  arcColor: row.arc_color,
-  brands: row.brands_detected as string[],
-  badges: row.badges as string[],
-  commentary: row.commentary as Clip["commentary"],
+const mapRaw = (r: RawClip): Clip => ({
+  id: r.id,
+  name: r.name,
+  video: r.video_url,
+  quality: r.quality_score,
+  viral: r.viral_score,
+  arc: r.story_arc,
+  arcColor: arcColorMap[r.story_arc] || "bg-muted",
+  brands: r.brands,
+  badges: r.top_badge ? [r.top_badge] : [],
+  commentary: {
+    espn: `${r.name}: ${r.caption}`,
+    hype: r.caption.toUpperCase() + " 🔥🔥🔥",
+    ronBurgundy: r.ron_burgundy_quote,
+    chuckNorris: `Chuck Norris once played this rally. The ball is still in orbit.`,
+  },
 });
 
 export const useClips = () =>
   useQuery({
-    queryKey: ["clips"],
+    queryKey: ["clips-github"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pickle_daas_analyses")
-        .select("*")
-        .order("created_at", { ascending: true });
-
-      if (error) throw error;
-      if (!data || data.length === 0) return fallbackClips;
-      return (data as unknown as DbAnalysis[]).map(mapToClip);
+      const res = await fetch(CLIPS_URL);
+      if (!res.ok) throw new Error("Failed to fetch clips");
+      const raw: RawClip[] = await res.json();
+      return raw.map(mapRaw);
     },
+    staleTime: 5 * 60 * 1000,
+    placeholderData: fallbackClips,
   });
 
 export const useFeaturedClip = () => {
   const { data: clips } = useClips();
-  return clips?.[0]
-    ? { video: clips[0].video, commentary: clips[0].commentary }
+  const featured = clips?.find((c) => c.id === "ce00696b");
+  return featured
+    ? { video: featured.video, commentary: featured.commentary }
     : fallbackFeatured;
 };

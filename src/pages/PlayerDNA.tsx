@@ -36,7 +36,7 @@ const PlayerDNA = () => {
               ))}
             </div>
             <p className="text-sm text-muted-foreground mt-2">
-              Clips Analyzed: {clips.length} | Dominant Shot: {player.dominant_shot} | Style: {player.play_styles.slice(0, 2).join(", ")}
+              Clips Analyzed: {player.clips_analyzed ?? clips.length} | Dominant Shot: {player.dominant_shot} | Style: {player.play_styles.slice(0, 2).join(", ")}
             </p>
           </div>
         </CardContent>

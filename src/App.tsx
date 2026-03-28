@@ -43,6 +43,7 @@ const App = () => (
               <Footer />
             </div>
             <PizzaEasterEgg />
+            <KeyboardShortcuts />
           </BrowserRouter>
         </TooltipProvider>
       </TMNTProvider>

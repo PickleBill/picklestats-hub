@@ -4,10 +4,10 @@ const corsHeaders = {
 };
 
 const VOICE_MAP: Record<string, string> = {
-  espn: 'nPczCjzI2devNBz1zQrb',       // Brian
-  hype: 'cjVigY5qzO86Huf0OWal',       // Eric
-  ronBurgundy: 'JBFqnCBsd6RMkjVDRZzb', // George
-  chuckNorris: 'iP95p4xoKVk53GoZ742B', // Chris
+  espn: 'TxGEqnHWrfWFTfGW9XjX',       // Josh — deep, broadcast
+  hype: 'ErXwobaYiN019PkySvjV',         // Antoni — energetic
+  ronBurgundy: 'pNInz6obpgDQGcFmaJgB',  // Adam — confident, pompous
+  chuckNorris: 'VR6AewLTigWG4xSOukaG',  // Arnold — legendary
 };
 
 Deno.serve(async (req) => {

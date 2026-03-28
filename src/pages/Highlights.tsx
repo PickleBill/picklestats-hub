@@ -2,17 +2,30 @@ import { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ClipModal from "@/components/ClipModal";
-import { useClips } from "@/hooks/useClips";
-import { type Clip } from "@/data/clips";
+import { usePickleDaas, type RawClip } from "@/context/PickleDaasContext";
 
-const HighlightCard = ({ clip, onClick }: { clip: Clip; onClick: () => void }) => {
+const arcColorMap: Record<string, string> = {
+  athletic_highlight: "bg-purple-500",
+  grind_rally: "bg-blue-500",
+  teaching_moment: "bg-primary/80",
+  pure_fun: "bg-yellow-500",
+  error_highlight: "bg-destructive",
+};
+
+const viralColor = (score: number) => {
+  if (score >= 7) return "bg-destructive text-destructive-foreground";
+  if (score >= 5) return "bg-accent text-accent-foreground";
+  return "bg-muted text-muted-foreground";
+};
+
+const HighlightCard = ({ clip, onClick }: { clip: RawClip; onClick: () => void }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   return (
     <Card
       className="card-surface cursor-pointer group overflow-hidden"
       onClick={onClick}
-      onMouseEnter={() => videoRef.current?.play()}
+      onMouseEnter={() => videoRef.current?.play().catch(() => {})}
       onMouseLeave={() => {
         if (videoRef.current) {
           videoRef.current.pause();
@@ -21,26 +34,32 @@ const HighlightCard = ({ clip, onClick }: { clip: Clip; onClick: () => void }) =
       }}
     >
       <div className="relative aspect-video">
-        <video ref={videoRef} src={clip.video} muted loop playsInline className="w-full h-full object-cover" />
-        <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground border-0 font-bold">{clip.quality}/10</Badge>
-        <Badge className={`absolute top-2 left-2 ${clip.arcColor} border-0 text-foreground`}>{clip.arc}</Badge>
+        <video ref={videoRef} src={clip.video_url} muted loop playsInline preload="metadata" className="w-full h-full object-cover" />
+        <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground border-0 font-bold">{clip.quality_score}/10</Badge>
+        <Badge className={`absolute top-2 left-2 ${viralColor(clip.viral_score)} border-0 font-bold`}>{clip.viral_score}/10</Badge>
       </div>
       <CardContent className="pt-4 space-y-2">
+        <Badge className={`${arcColorMap[clip.story_arc] || "bg-muted"} text-foreground border-0 text-[10px]`}>{clip.story_arc.replace(/_/g, " ")}</Badge>
         <h3 className="font-semibold text-foreground">{clip.name}</h3>
-        <p className="text-xs text-muted-foreground line-clamp-2">{clip.commentary.ronBurgundy}</p>
+        <p className="text-xs text-muted-foreground line-clamp-2 border-l-2 border-primary/40 pl-2 italic">
+          {clip.ron_burgundy_quote}
+        </p>
         <div className="flex gap-1 flex-wrap">
-          {clip.badges.map((b) => (<Badge key={b} variant="outline" className="text-xs">{b}</Badge>))}
-          {clip.brands.map((b) => (<Badge key={b} variant="secondary" className="text-xs">{b}</Badge>))}
+          {clip.brands.map((b, i) => (
+            <Badge key={b} variant="outline" className={`text-[10px] ${i === 0 ? "border-accent text-accent" : ""}`}>{b}</Badge>
+          ))}
         </div>
-        <p className="text-xs text-muted-foreground">Viral: <span className="text-gold font-semibold">{clip.viral}/10</span></p>
+        {clip.top_badge && (
+          <Badge className="bg-primary/20 text-primary border-0 text-[10px]">{clip.top_badge}</Badge>
+        )}
       </CardContent>
     </Card>
   );
 };
 
 const Highlights = () => {
-  const { data: clips = [] } = useClips();
-  const [selected, setSelected] = useState<Clip | null>(null);
+  const { clips } = usePickleDaas();
+  const [selected, setSelected] = useState<RawClip | null>(null);
 
   return (
     <div className="container py-8">

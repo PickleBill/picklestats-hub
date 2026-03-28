@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PickleDaasProvider } from "@/context/PickleDaasContext";
-import TopNav from "./components/TopNav";
+import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import Index from "./pages/Index";
 import Highlights from "./pages/Highlights";
@@ -22,16 +22,20 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <TopNav />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/highlights" element={<Highlights />} />
-            <Route path="/player-dna" element={<PlayerDNA />} />
-            <Route path="/brands" element={<Brands />} />
-            <Route path="/voice-lab" element={<VoiceLab />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Footer />
+          <Sidebar />
+          <div className="md:ml-64 min-h-screen flex flex-col pb-16 md:pb-0">
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/highlights" element={<Highlights />} />
+                <Route path="/player-dna" element={<PlayerDNA />} />
+                <Route path="/brands" element={<Brands />} />
+                <Route path="/voice-lab" element={<VoiceLab />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
         </BrowserRouter>
       </TooltipProvider>
     </PickleDaasProvider>

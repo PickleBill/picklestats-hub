@@ -60,7 +60,7 @@ const Sports = () => {
     caption: c.caption,
   }));
 
-  const allClips = sportClips ? sportClips : [...pickleAsSport, ...fallbackSportClips];
+  const allClips = Array.isArray(sportClips) ? sportClips : [...pickleAsSport, ...fallbackSportClips];
   const sports = Array.from(new Set(allClips.map((c) => c.sport)));
   const sportCounts = sports.reduce((acc, s) => ({ ...acc, [s]: allClips.filter((c) => c.sport === s).length }), {} as Record<string, number>);
 
